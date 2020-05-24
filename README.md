@@ -1,5 +1,8 @@
-# Android_Example 
+# Android_Example
+这个是用来存放学习Android过程中编写的代码示例，学习的
+资料是Android编程权威指南第3版本。代码编写参考书中内容。
 
-This is a Repositories of Android Projects
+部分代码示例是自己动手实践的代码，与博客内容匹配。
 
-add context
+以前的代码在本地，使用Github托管代码后方便查看代码，而且
+在以后需要查阅时也可以看到历史记录。
