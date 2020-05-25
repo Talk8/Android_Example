@@ -14,6 +14,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.UUID;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,6 +30,7 @@ public class CrimeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String CRIME_ID = "crime_id";
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -42,6 +45,19 @@ public class CrimeFragment extends Fragment {
 
     public CrimeFragment() {
         // Required empty public constructor
+    }
+
+    //这个是自己定义的方法，使用了简单工厂模式
+    //其实使用AST创建Fragment时会自动创建此方法，
+    //看来官方找茬使用Fragmetn的参数来传递数据，而不是使用intent
+    public static CrimeFragment newInstance(UUID uuid) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(CRIME_ID,uuid);
+
+        CrimeFragment crimeFragment = new CrimeFragment();
+        crimeFragment.setArguments(bundle);
+
+        return crimeFragment;
     }
 
     /**
@@ -70,7 +86,13 @@ public class CrimeFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        mCrime = new Crime();
+        //mCrime = new Crime();
+        //通过Activity的intent来传递数据
+        //UUID uuid = (UUID)getActivity().getIntent().getSerializableExtra(CrimeActivity.KEY_UUID);
+        //通过Fragment的参数来传递数据
+        UUID uuid = (UUID) getArguments().getSerializable(CRIME_ID);
+        mCrime = CrimeLab.getCrimeLab(getActivity()).getCrime(uuid);
+
     }
 
     @Override
@@ -84,6 +106,7 @@ public class CrimeFragment extends Fragment {
         mDateButton.setEnabled(false);
 
         mSolvedCheckBox = (CheckBox)view.findViewById(R.id.crime_solved);
+        mSolvedCheckBox.setChecked(mCrime.isSolved());
         mSolvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -92,6 +115,7 @@ public class CrimeFragment extends Fragment {
         });
 
         mTitleField = (EditText)view.findViewById(R.id.crime_title);
+        mTitleField.setText(mCrime.getTitle());
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

@@ -1,6 +1,7 @@
 package com.example.talk8.criminalintent;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,12 +40,24 @@ public class CrimeListFragment extends Fragment {
         updateUI();
         return view;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //当Model中的数据变化后，刷新View界面中的数据
+        updateUI();
+    }
+
     public void updateUI() {
         CrimeLab crimeLab = CrimeLab.getCrimeLab(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if (mAdapter == null) {
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }else {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -76,8 +90,13 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(),mCrime.getTitle()+" Clicked",Toast.LENGTH_LONG).show();
-        }
+            //Toast.makeText(getActivity(),mCrime.getTitle()+" Clicked",Toast.LENGTH_LONG).show();
+            //点击某个项目跳转到该项目的详细资料中，本质上是从Fragment中跳转到Activity中
+            //Intent intent = new Intent(getActivity(),CrimeActivity.class);
+            Intent intent = CrimeActivity.newIntent(getActivity(),mCrime.getId());
+
+            startActivity(intent);
+         }
     }
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
