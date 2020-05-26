@@ -10,9 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -93,8 +91,12 @@ public class CrimeListFragment extends Fragment {
             //Toast.makeText(getActivity(),mCrime.getTitle()+" Clicked",Toast.LENGTH_LONG).show();
             //点击某个项目跳转到该项目的详细资料中，本质上是从Fragment中跳转到Activity中
             //Intent intent = new Intent(getActivity(),CrimeActivity.class);
-            Intent intent = CrimeActivity.newIntent(getActivity(),mCrime.getId());
+            //Intent intent = CrimeActivity.newIntent(getActivity(),mCrime.getId());
 
+            //使用CrimePageActivity替代了原来的CrimeActivity,因为前者包含了ViewPage.
+            //后者只是简单地显示某一个选项的详情，而前者除了有此功能外，还可以通过左右滑动
+            //来切换到前一个或者后一个选项的详情界面,作者删除了CrimeActivity.java，我没有
+            Intent intent = CrimePageActivity.newIntent(getActivity(),mCrime.getId());
             startActivity(intent);
          }
     }

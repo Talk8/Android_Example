@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -31,11 +32,14 @@ public class CrimeFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String CRIME_ID = "crime_id";
+    private static final String VIEW_PAGE= "view_page";
 
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckBox;
+    private Button mFirstButton;
+    private Button mEndButton;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -102,6 +106,34 @@ public class CrimeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
         mDateButton = (Button)view.findViewById(R.id.crime_date);
+        mFirstButton = (Button)view.findViewById(R.id.go_to_first);
+        mEndButton = (Button)view.findViewById(R.id.go_to_end);
+
+        //快速跳转到第一个选项的详情页面，这个是书中的扩展练习，我自己添加的
+        //想通过Fragment的参数传递Viewpage对象，结果无法put到Bundle中，因此无法传递
+        //于自定义getViewPage方法。本质上是通过ViewPage修改当前的索引值
+        mFirstButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewPager viewPager = ((CrimePageActivity)getActivity()).getViewPager();
+                if(viewPager != null) {
+                    viewPager.setCurrentItem(0);
+                }
+            }
+        });
+        //快速跳转到最后一个选项的详情页面，这个是书中的扩展练习，我自己添加的
+        //我在模拟器上运行时有闪出其它选项详情的页面，才50个选项就出问题，看来需要优化性能
+        mEndButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewPager viewPager = ((CrimePageActivity)getActivity()).getViewPager();
+                if(viewPager != null) {
+                    int size = CrimeLab.getCrimeLab(getContext()).getCrimes().size()-1;
+                    viewPager.setCurrentItem(size);
+                }
+            }
+        });
+
         mDateButton.setText(mCrime.getDate().toString());
         mDateButton.setEnabled(false);
 
