@@ -1,9 +1,13 @@
 package com.example.talk8.criminalintent;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.Date;
 import java.util.UUID;
 
 
@@ -33,6 +38,8 @@ public class CrimeFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private static final String CRIME_ID = "crime_id";
     private static final String VIEW_PAGE= "view_page";
+    private static final String DIALOG_DATE = "DialogDate";
+    private static final int REQUEST_CODE = 0;
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -134,8 +141,30 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mDateButton.setText(mCrime.getDate().toString());
-        mDateButton.setEnabled(false);
+        updateData();
+        //mDateButton.setEnabled(false);
+        mDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //以下方法是创建DialogFragment子类对象，并且通过show方法显示alterDialog
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                //FragmentManager fragmentManager = getFragmentManager();
+//                DatePickerFragment datePickerFragmentDialog = new DatePickerFragment();
+                //使用工厂方法创建dialog子类对象，主要是用来在两个Fragment之间传递数据
+                DatePickerFragment alterDialog = DatePickerFragment.newInstance(mCrime.getDate());
+                //设置目标Fragment，类似Activity之间的startActivityForResult
+                alterDialog.setTargetFragment(CrimeFragment.this,REQUEST_CODE);
+                alterDialog.show(fragmentManager,DIALOG_DATE);
+                // 以下使用app库的alterDialog，不依赖任何托管Activity
+//                AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity())
+//                        .setTitle(R.string.date_picker_title)
+//                        .setMessage("AlterDialog")
+//                        .setPositiveButton(R.string.alter_dialog_ok,null)
+//                        .setNegativeButton(R.string.alter_dialog_cancel,null);
+//                alertDialog.show();
+            }
+        });
 
         mSolvedCheckBox = (CheckBox)view.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());
@@ -174,6 +203,22 @@ public class CrimeFragment extends Fragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    //获取从其它Fragment中传递来的数据
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode != Activity.RESULT_OK || requestCode != REQUEST_CODE)
+            return;
+        Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+        mCrime.setDate(date);
+        updateData();
+    }
+
+    //这个方法是使用AST自动生成的:快捷键：Ctrl+Alt+m
+    private void updateData() {
+        mDateButton.setText(mCrime.getDate().toString());
     }
 
     @Override
