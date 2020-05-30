@@ -12,12 +12,13 @@ public class CrimeLab {
 
     private CrimeLab(Context context) {
         mCrimes = new ArrayList<>();
-        for(int i=0; i<50;++i) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #"+i);
-            crime.setSolved(i%2 == 0);
-            mCrimes.add(crime);
-        }
+        //在chapter113中添加工具栏菜单后，不在自动添加项目，调用addCrime手动添加Crime
+//        for(int i=0; i<50;++i) {
+//            Crime crime = new Crime();
+//            crime.setTitle("Crime #"+i);
+//            crime.setSolved(i%2 == 0);
+//            mCrimes.add(crime);
+//        }
     }
 
     public static CrimeLab getCrimeLab(Context context) {
@@ -39,5 +40,8 @@ public class CrimeLab {
             }
         }
         return null;
+    }
+    public void addCrime(Crime c) {
+        mCrimes.add(c);
     }
 }

@@ -4,10 +4,15 @@ package com.example.talk8.criminalintent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -37,6 +42,14 @@ public class CrimeListFragment extends Fragment {
 
         updateUI();
         return view;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //代码中重写了onCreateOptionsMenu方法,但是它是Fragment的方法
+        //进行以下设置，让Activity的该方法通过FragmentManager来回调Fragment的相同方法
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -128,5 +141,39 @@ public class CrimeListFragment extends Fragment {
         public int getItemCount() {
             return mCrimes.size();
         }
+    }
+
+    //添加菜单
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime_list,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            //点击加号会添加一条记录，并且实时更新到界面中
+            case R.id.new_crime:
+                Crime crime = new Crime();
+                crime.setTitle("Crime#1");
+                crime.setSolved(true);
+                CrimeLab.getCrimeLab(getActivity()).addCrime(crime);
+                //不更新的话，界面不会显示刚刚添加的Crimes
+                updateUI();
+                return true;
+             case R.id.show_subtitle:
+                updateSubtitle();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void updateSubtitle() {
+        CrimeLab crimeLab = CrimeLab.getCrimeLab(getActivity());
+        int crimeCount = crimeLab.getCrimes().size();
+        String subTitle = getString(R.string.subtitle_format,crimeCount);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(subTitle);
     }
 }
