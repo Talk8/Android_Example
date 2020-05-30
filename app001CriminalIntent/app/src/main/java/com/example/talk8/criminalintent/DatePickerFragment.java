@@ -68,8 +68,8 @@ public class DatePickerFragment extends DialogFragment{
         //return super.onCreateDialog(savedInstanceState);
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_date_picker,null);
 
-        //Fragment之间的数据传递：CrimeFragmetn到当前Fragmetn
-        // 这里传递的数据是日期，把Crime中存放的日期传递到DatePicker控件上
+        //Fragment之间的数据传递：CrimeFragment到当前Fragment
+        //这里传递的数据是日期，把Crime中存放的日期传递到DatePicker控件上
         Date date = (Date)getArguments().getSerializable(DATE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
