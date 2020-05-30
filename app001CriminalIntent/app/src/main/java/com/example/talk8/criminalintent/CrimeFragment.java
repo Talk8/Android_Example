@@ -3,6 +3,7 @@ package com.example.talk8.criminalintent;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +49,9 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private Button mFirstButton;
     private Button mEndButton;
+    private Button mReportButton;
+    private Button mChooseSuspectButton;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -115,6 +120,9 @@ public class CrimeFragment extends Fragment {
         mDateButton = (Button)view.findViewById(R.id.crime_date);
         mFirstButton = (Button)view.findViewById(R.id.go_to_first);
         mEndButton = (Button)view.findViewById(R.id.go_to_end);
+        mReportButton = (Button) view.findViewById(R.id.crime_report);
+        mChooseSuspectButton = (Button)view.findViewById(R.id.crime_suspect);
+        mChooseSuspectButton.setEnabled(false);
 
         //快速跳转到第一个选项的详情页面，这个是书中的扩展练习，我自己添加的
         //想通过Fragment的参数传递Viewpage对象，结果无法put到Bundle中，因此无法传递
@@ -142,6 +150,31 @@ public class CrimeFragment extends Fragment {
         });
 
         updateData();
+
+        PackageManager pm = getActivity().getPackageManager();
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        //以下代码用来控制是否enable按钮，如果程序没有匹配的Action，使用隐式intent就会导致
+        //程序发生crash,注释掉的ACTION没有程序响应，会把按钮灰显
+        //Intent intent = new Intent(Intent.CATEGORY_HOME);
+        if(pm.resolveActivity(intent,PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mReportButton.setEnabled(false);
+        }
+
+        mReportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //通过隐式Intent启动Activity
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT,getCrimeReport());
+                intent.putExtra(Intent.EXTRA_SUBJECT,getString(R.string.crime_report_subject));
+                //chooser可以每次都弹出选择发送报告的程序，不过破坏了原来的界面
+                //原来界面有，只有一次和一直使用的区别，这个体验好一些
+                intent = Intent.createChooser(intent,getString(R.string.send_report));
+                startActivity(intent);
+            }
+        });
+
         //mDateButton.setEnabled(false);
         mDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,6 +254,27 @@ public class CrimeFragment extends Fragment {
         mDateButton.setText(mCrime.getDate().toString());
     }
 
+    private String getCrimeReport() {
+        String solvedString = null;
+        if(mCrime.isSolved()) {
+            solvedString = getString(R.string.crime_report_solved);
+        }else {
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+        String dateFormat = "EEE,MMM,dd";
+        String dateString = DateFormat.format(dateFormat,mCrime.getDate()).toString();
+
+        String suspect = mCrime.getSuspect();
+        if(suspect == null) {
+            suspect = getString(R.string.crime_report_no_suspect);
+        }else {
+            suspect = getString(R.string.crime_report_suspect,suspect);
+        }
+
+        String report = getString(R.string.crime_report,mCrime.getTitle(),dateString,solvedString,suspect);
+
+        return report;
+    }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
