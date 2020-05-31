@@ -2,6 +2,7 @@ package com.example.talk8.criminalintent;
 
 import android.content.Context;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -9,9 +10,11 @@ import java.util.UUID;
 public class CrimeLab {
     private static CrimeLab sCrimeLab;
     private List<Crime> mCrimes;
+    private Context mContext;
 
     private CrimeLab(Context context) {
         mCrimes = new ArrayList<>();
+        mContext = context;
         //在chapter113中添加工具栏菜单后，不在自动添加项目，调用addCrime手动添加Crime
 //        for(int i=0; i<50;++i) {
 //            Crime crime = new Crime();
@@ -43,5 +46,10 @@ public class CrimeLab {
     }
     public void addCrime(Crime c) {
         mCrimes.add(c);
+    }
+
+    public File getPhotoFile(Crime crime) {
+        File fileDir = mContext.getFilesDir();
+        return new File(fileDir,crime.getPhontFilename());
     }
 }

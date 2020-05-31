@@ -47,6 +47,9 @@ public class Crime {
         mSolved = solved;
     }
 
+    public String getPhontFilename() {
+        return "IMG_"+getId().toString()+".jpg";
+    }
     public Crime () {
         //使用Java UUID类生成随机Id
         mId = UUID.randomUUID();

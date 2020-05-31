@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,8 +24,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
+import java.io.File;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -42,6 +50,7 @@ public class CrimeFragment extends Fragment {
     private static final String VIEW_PAGE= "view_page";
     private static final String DIALOG_DATE = "DialogDate";
     private static final int REQUEST_CODE = 0;
+    private static final int REQUEST_PHOTO  = 1;
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -51,6 +60,9 @@ public class CrimeFragment extends Fragment {
     private Button mEndButton;
     private Button mReportButton;
     private Button mChooseSuspectButton;
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
+    private File mPhotoFile;
 
 
     // TODO: Rename and change types of parameters
@@ -108,6 +120,7 @@ public class CrimeFragment extends Fragment {
         //通过Fragment的参数来传递数据
         UUID uuid = (UUID) getArguments().getSerializable(CRIME_ID);
         mCrime = CrimeLab.getCrimeLab(getActivity()).getCrime(uuid);
+        mPhotoFile = CrimeLab.getCrimeLab(getActivity()).getPhotoFile(mCrime);
 
     }
 
@@ -123,6 +136,32 @@ public class CrimeFragment extends Fragment {
         mReportButton = (Button) view.findViewById(R.id.crime_report);
         mChooseSuspectButton = (Button)view.findViewById(R.id.crime_suspect);
         mChooseSuspectButton.setEnabled(false);
+        mPhotoButton = (ImageButton)view.findViewById(R.id.crime_camera);
+        mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
+
+        //创建intent
+        Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //如果没有拍照程序就灰显button
+        PackageManager packageManager = getActivity().getPackageManager();
+        boolean canTakePhoto = mPhotoFile != null &&
+                captureImage.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = FileProvider.getUriForFile(getActivity(),
+                        "com.example.talk8.criminalintent.fileprovider",mPhotoFile);
+                captureImage.putExtra(MediaStore.EXTRA_OUTPUT,uri);
+                //下面是检查FileProvider权限的，我觉得没有必要,第一行代码中没有此操作
+//                List<ResolveInfo>  camActivitys = getActivity().getPackageManager()
+//                        .queryIntentActivities(captureImage,PackageManager.MATCH_DEFAULT_ONLY);
+//                for(ResolveInfo index: camActivitys) {
+//                    getActivity().grantUriPermission(index.activityInfo.packageName,
+//                            uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+//                }
+                startActivityForResult(captureImage,REQUEST_PHOTO);
+            }
+        });
 
         //快速跳转到第一个选项的详情页面，这个是书中的扩展练习，我自己添加的
         //想通过Fragment的参数传递Viewpage对象，结果无法put到Bundle中，因此无法传递
@@ -150,6 +189,7 @@ public class CrimeFragment extends Fragment {
         });
 
         updateData();
+        updatePhotoView();
 
         PackageManager pm = getActivity().getPackageManager();
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -242,11 +282,25 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode != Activity.RESULT_OK || requestCode != REQUEST_CODE)
+        if(resultCode != Activity.RESULT_OK )
             return;
-        Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
-        mCrime.setDate(date);
-        updateData();
+
+        switch (requestCode) {
+            case REQUEST_CODE:
+            Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+            mCrime.setDate(date);
+            updateData();
+            break;
+            case  REQUEST_PHOTO:
+                Uri uri = FileProvider.getUriForFile(getActivity(),
+                        "com.example.talk8.criminalintent.fileprovider",mPhotoFile);
+                //申请权限的代码，删除掉也可以正常运行
+//                getActivity().revokeUriPermission(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                updatePhotoView();
+                break;
+            default:
+                break;
+        }
     }
 
     //这个方法是使用AST自动生成的:快捷键：Ctrl+Alt+m
@@ -274,6 +328,14 @@ public class CrimeFragment extends Fragment {
         String report = getString(R.string.crime_report,mCrime.getTitle(),dateString,solvedString,suspect);
 
         return report;
+    }
+    private void updatePhotoView() {
+        if(mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null);
+        }else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(),getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
     }
     @Override
     public void onAttach(Context context) {
