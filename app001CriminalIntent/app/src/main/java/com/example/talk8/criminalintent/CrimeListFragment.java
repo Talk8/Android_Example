@@ -1,6 +1,7 @@
 package com.example.talk8.criminalintent;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,11 +27,15 @@ import java.util.List;
 public class CrimeListFragment extends Fragment {
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
+    private Callbacks mCallbacks;
 
     public CrimeListFragment() {
         // Required empty public constructor
     }
 
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -109,8 +114,9 @@ public class CrimeListFragment extends Fragment {
             //使用CrimePageActivity替代了原来的CrimeActivity,因为前者包含了ViewPage.
             //后者只是简单地显示某一个选项的详情，而前者除了有此功能外，还可以通过左右滑动
             //来切换到前一个或者后一个选项的详情界面,作者删除了CrimeActivity.java，我没有
-            Intent intent = CrimePageActivity.newIntent(getActivity(),mCrime.getId());
-            startActivity(intent);
+//            Intent intent = CrimePageActivity.newIntent(getActivity(),mCrime.getId());
+//            startActivity(intent);
+            mCallbacks.onCrimeSelected(mCrime);
          }
     }
 
@@ -161,6 +167,7 @@ public class CrimeListFragment extends Fragment {
                 CrimeLab.getCrimeLab(getActivity()).addCrime(crime);
                 //不更新的话，界面不会显示刚刚添加的Crimes
                 updateUI();
+                mCallbacks.onCrimeSelected(crime);
                 return true;
              case R.id.show_subtitle:
                 updateSubtitle();
@@ -175,5 +182,22 @@ public class CrimeListFragment extends Fragment {
         int crimeCount = crimeLab.getCrimes().size();
         String subTitle = getString(R.string.subtitle_format,crimeCount);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(subTitle);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks)context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

@@ -71,6 +71,11 @@ public class CrimeFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
     public CrimeFragment() {
         // Required empty public constructor
     }
@@ -245,6 +250,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                updateCrime();
             }
         });
 
@@ -259,7 +265,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setTitle(s.toString());
-
+                updateCrime();
             }
 
             @Override
@@ -289,6 +295,7 @@ public class CrimeFragment extends Fragment {
             case REQUEST_CODE:
             Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
+            updateCrime();
             updateData();
             break;
             case  REQUEST_PHOTO:
@@ -297,6 +304,7 @@ public class CrimeFragment extends Fragment {
                 //申请权限的代码，删除掉也可以正常运行
 //                getActivity().revokeUriPermission(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 updatePhotoView();
+                updateCrime();
                 break;
             default:
                 break;
@@ -337,6 +345,10 @@ public class CrimeFragment extends Fragment {
             mPhotoView.setImageBitmap(bitmap);
         }
     }
+    private void updateCrime() {
+        //CrimeLab.getCrimeLab(getActivity()).updateCrime();
+        mCallbacks.onCrimeUpdated(mCrime);
+    }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -346,12 +358,15 @@ public class CrimeFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+        mCallbacks = (Callbacks)context;
     }
+
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mCallbacks = null;
     }
 
     /**

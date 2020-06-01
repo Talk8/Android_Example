@@ -13,7 +13,8 @@ import android.os.Bundle;
 import java.util.List;
 import java.util.UUID;
 
-public class CrimePageActivity extends AppCompatActivity implements CrimeFragment.OnFragmentInteractionListener {
+public class CrimePageActivity extends AppCompatActivity
+        implements CrimeFragment.OnFragmentInteractionListener ,CrimeFragment.Callbacks{
     private static final String VP_CRIME_ID = "view_page_crime_id";
     private ViewPager mViewPager;
     private List<Crime> mCrimes;
@@ -67,5 +68,10 @@ public class CrimePageActivity extends AppCompatActivity implements CrimeFragmen
             return mViewPager;
 
         return null;
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
     }
 }

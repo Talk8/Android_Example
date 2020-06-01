@@ -11,7 +11,8 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
+        //setContentView(R.layout.activity_fragment);
+        setContentView(getLayoutResId());
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
@@ -22,5 +23,11 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
             fragment =  createFragment();
             fragmentManager.beginTransaction().add(R.id.fragment_container,fragment).commit();
         }
+    }
+
+    //开放接口让子类继承，如果子类有切换布局的需求，可以重写此方法，
+    //这样就可以获取不同子类的不同资源id,以便切换布局
+    protected int getLayoutResId() {
+        return R.layout.activity_fragment;
     }
 }
