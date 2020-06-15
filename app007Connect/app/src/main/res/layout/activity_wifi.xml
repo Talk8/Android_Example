@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".WifiActivity">
+
+    <Button
+        android:id="@+id/bt_connect_wifi"
+        android:textAllCaps="false"
+        android:text="Connect Wifi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/bt_search_device"
+        android:textAllCaps="false"
+        android:text="Search Device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:id="@+id/linear_fragment"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <fragment
+            android:name="com.example.talk8.conn.DeviceListFragment"
+            android:id="@+id/frag_device_list"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"/>
+
+        <fragment
+            class="com.example.talk8.conn.DeviceDeatilFragment"
+            android:id="@+id/frag_device_detail"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"/>
+    </LinearLayout>
+</LinearLayout>
