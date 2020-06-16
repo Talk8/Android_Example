@@ -39,6 +39,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
         if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Check to see if Wi-Fi is enabled and notify appropriate activity
+           //主要检查是否enable设备的P2P模式，只有在P2P模式时才能搜索到设备
             Log.i(TAG, "onReceive: WIFI_P2P_STATE_CHANGED_ACTION");
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE,-1);
             if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
@@ -51,6 +52,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             }
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // Call WifiP2pManager.requestPeers() to get a list of current peers
+            //搜索到p2p设备时才能收到此广播
             Log.i(TAG, "onReceive: WIFI_P2P_PEERS_CHANGED_ACTION");
             if (mManager != null) {
                 Log.i(TAG, "onReceive: requestPeers");
@@ -58,6 +60,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             }
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             // Respond to new connection or disconnections
+            //设备的连接状态变化时收到此广播，比如连接，断开设备
             Log.i(TAG, "onReceive: WIFI_P2P_CONNECTION_CHANGED_ACTION");
             if (mManager == null) {
                 return;
@@ -75,6 +78,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             }
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
+            //设备变化时收到此广播，比如更换了另外一个设备，通常第一次和某个设备连接时也会收到此消息
             Log.i(TAG, "onReceive: WIFI_P2P_THIS_DEVICE_CHANGED_ACTION");
             DeviceListFragment fragment = (DeviceListFragment) mActivity.getSupportFragmentManager().findFragmentById(R.id.frag_device_list);
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
